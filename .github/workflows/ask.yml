@@ -1,0 +1,25 @@
+name: ask-superagent
+# Sandbox helper: post a comment that mentions the agent account, so the
+# GitHub Source under test receives a real notification even when no second
+# human GitHub account is available. The comment author is github-actions[bot],
+# which the Policy must list under bots and admit (eval mode auto).
+on:
+  workflow_dispatch:
+    inputs:
+      request:
+        description: What the agent should do
+        required: true
+        type: string
+permissions:
+  issues: write
+jobs:
+  ask:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mention the agent in the sandbox issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUEST: ${{ inputs.request }}
+        run: |
+          gh api -X POST "repos/${{ github.repository }}/issues/1/comments" \
+            -f body="@zyh-hash ${REQUEST}"
